@@ -51,7 +51,6 @@ defmodule Bookmarksync.Pocket do
     Map.get( data, "list" )
     |> Map.values
     |> Enum.map( &( Map.take( &1, keys_for_pinboard ) ) )
-    |> flatten_tags
   end
 
   @doc """
