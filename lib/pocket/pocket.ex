@@ -23,18 +23,20 @@ defmodule Bookmarksync.Pocket do
       _   -> { :error }
     end
   end
-
+  
   @doc """
-  Retrieves favorited bookmarks from Pocket API.
+  General purpose fetching of Pocket bookmarks.
+  Defaults to fetching all unread items.
   """
-  def get_favorites do
+  def get( options \\ %{} ) do
     auth = Bookmarksync.Storage.get( "pocket" )
-    post_body = %{
+    defaults = %{
       "consumer_key" => Map.get( auth, "consumer_key" ),
       "access_token" => Map.get( auth, "access_token" ),
       "detailType" => "complete",
-      "favorite" => 1
     }
+
+    post_body = Map.merge( defaults, options )
 
     Bookmarksync.URLBuilder.pocket_retrieve_url()
     |> HTTPotion.post( [ body: Poison.encode!( post_body ), headers: @post_headers ] )
@@ -43,7 +45,13 @@ defmodule Bookmarksync.Pocket do
   end
 
   @doc """
+  Retrieves favorited bookmarks from Pocket API.
   """
+  def get_favorites do
+    %{ "favorite" => 1 }
+    |> get()
+  end
+
   @doc """
   Parses the full response body from the API request to get what we need from a bookmark.
   """
@@ -83,6 +91,14 @@ defmodule Bookmarksync.Pocket do
       Enum.find( current, fn( link_from_current ) ->
         link_from_current == Map.get( bookmark, "url" )
       end ) == nil end )
+  end
+
+  def process_all( data ) do
+    data
+    |> process_api_response()
+    |> flatten_tags()
+    |> format_bookmarks()
+    |> remove_duplicate_bookmarks( Bookmarksync.Pinboard.get_all_links )
   end
 end
 
