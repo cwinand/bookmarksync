@@ -135,7 +135,7 @@ defmodule Bookmarksync.Pinboard do
       "url" => Map.get( data, "resolved_url" ),
       "description" => Map.get( data, "resolved_title" ),
       "dt" => Map.get( data, "time_added" ) |> String.to_integer |> DateTime.from_unix! |> DateTime.to_iso8601,
-      "tags" => Map.get( data, "tags" ) |> Enum.join( "," )
+      "tags" => Map.get( data, "tags" ) |> List.insert_at( -1, "from:pocket" ) |> Enum.join( "," )
     }
   end
 end
