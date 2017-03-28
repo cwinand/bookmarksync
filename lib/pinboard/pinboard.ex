@@ -138,4 +138,17 @@ defmodule Bookmarksync.Pinboard do
       "tags" => Map.get( data, "tags" ) |> List.insert_at( -1, "from:pocket" ) |> Enum.join( "," )
     }
   end
+
+  def add( bookmark ) do
+    auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
+    query = %{ "auth_token" => auth, "format" => "json" }
+    |> Map.merge( bookmark ) 
+    |> URI.encode_query()
+
+    Bookmarksync.URLBuilder.pinboard_add_url()
+    |> Bookmarksync.URLBuilder.join_path_with_query( query )
+    |> HTTPotion.get
+    |> Map.get( :body )
+    |> Poison.decode!
+  end
 end
