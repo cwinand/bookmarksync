@@ -59,6 +59,7 @@ defmodule Bookmarksync.URLBuilder do
   @pinboard_api_last_update "update"
   @pinboard_api_get "get"
   @pinboard_api_all "all"
+  @pinboard_api_add "add"
 
   ##
   ## Pinboard API URLs
@@ -73,6 +74,10 @@ defmodule Bookmarksync.URLBuilder do
 
   def pinboard_retrieve_all_url do
     join_path_fragments [ @pinboard_base, @pinboard_api_version, @pinboard_api_posts, @pinboard_api_all ]
+  end
+
+  def pinboard_add_url do
+    join_path_fragments [ @pinboard_base, @pinboard_api_version, @pinboard_api_posts, @pinboard_api_add ]
   end
 
   def pinboard_tags_url do
