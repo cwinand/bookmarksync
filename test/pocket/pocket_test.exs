@@ -40,7 +40,7 @@ defmodule Bookmarksync.PocketTest do
   end
 
   test "filters Pocket API data down to list of required bookmark data", context do
-    processed = process_body( context[ :data ] )
+    processed = process_api_response( context[ :data ] )
 
     assert is_list processed
     assert is_map List.first( processed )
@@ -52,7 +52,7 @@ defmodule Bookmarksync.PocketTest do
   end
 
   test "flattens Pocket bookmark tags to format acceptable to Pinboard API", context do
-    flattened = process_body( context[ :data ] )
+    flattened = process_api_response( context[ :data ] )
                 |> flatten_tags()
 
     assert is_list flattened
@@ -61,7 +61,7 @@ defmodule Bookmarksync.PocketTest do
   end
 
   test "converts each bookmark in a list to format acceptable to Pinboard API", context do
-    formatted = process_body( context[ :data ] )
+    formatted = process_api_response( context[ :data ] )
                 |> flatten_tags()
                 |> format_bookmarks()
 
@@ -74,7 +74,7 @@ defmodule Bookmarksync.PocketTest do
   end
 
   test "removes bookmarks from a list if that bookmark's URL exists in a list", context do
-    deduped = process_body( context[ :data ] ) 
+    deduped = process_api_response( context[ :data ] ) 
               |> flatten_tags()
               |> format_bookmarks()
               |> remove_duplicate_bookmarks( context[ :existing_url ] )

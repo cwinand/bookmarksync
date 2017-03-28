@@ -43,12 +43,15 @@ defmodule Bookmarksync.Pocket do
   end
 
   @doc """
-  Removes unneeded data from a list of Pocket bookmarks.
   """
-  def process_body( data ) do
+  @doc """
+  Parses the full response body from the API request to get what we need from a bookmark.
+  """
+  def process_api_response( response ) do
     keys_for_pinboard = [ "resolved_url", "resolved_title", "time_added", "tags" ]
 
-    Map.get( data, "list" )
+    response
+    |> Map.get( "list" )
     |> Map.values
     |> Enum.map( &( Map.take( &1, keys_for_pinboard ) ) )
   end
