@@ -60,7 +60,6 @@ defmodule Bookmarksync.Pinboard do
       query = URI.encode_query( %{
         "auth_token" => auth,
         "format" => "json",
-        "fromdt" => DateTime.from_unix!( last ) |> DateTime.to_iso8601
       } )
 
       Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
