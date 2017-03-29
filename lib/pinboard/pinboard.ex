@@ -98,6 +98,28 @@ defmodule Bookmarksync.Pinboard do
   end
 
   @doc """
+  Simple check to see if the current cache is out of date.
+  """
+  def stale_cache? do
+    last = last_update()
+    cache = get_latest_cache() 
+            |> String.split( "." )
+            |> List.first
+            |> String.to_integer
+
+    last > cache
+  end
+
+  @doc """
+  Gets the filename of the most recent cached JSON.
+  """
+  def get_latest_cache do
+    File.ls!( "data/pinboard" )
+    |> Enum.sort
+    |> List.last
+  end
+
+  @doc """
   Writes a new JSON blob of bookmarks to a file named by the last_update timestamp.
   """
   def update_cache( data, timestamp ) do
