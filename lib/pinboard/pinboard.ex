@@ -1,15 +1,21 @@
 defmodule Bookmarksync.Pinboard do
 
   @doc """
+  Builds default query for requests to Pinboard API.
+  """
+  def default_query do
+    %{
+      "auth_token" => Bookmarksync.Storage.get( :config, [ "pinboard", "token" ] ),
+      "format" => "json"
+    }
+  end
+
+
+  @doc """
   Stripped down request to Pinboard API to check that we are authenticated and the service is up.
   """
   def ping do
-    auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
-    query = URI.encode_query( %{
-      "auth_token" => auth,
-      "format" => "json"
-    } )
-
+    query = URI.encode_query( default_query() )
     status = Bookmarksync.URLBuilder.pinboard_last_update_url()
              |> Bookmarksync.URLBuilder.join_path_with_query( query )
              |> HTTPotion.get
@@ -26,12 +32,7 @@ defmodule Bookmarksync.Pinboard do
   so we avoid Pinboard's rate limit on the /posts/all endpoint.
   """
   def last_update do
-    auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
-    query = URI.encode_query( %{
-      "auth_token" => auth,
-      "format" => "json"
-    } )
-
+    query = URI.encode_query( default_query() )
     { status, response, _ } = Bookmarksync.URLBuilder.pinboard_last_update_url()
                               |> Bookmarksync.URLBuilder.join_path_with_query( query )
                               |> HTTPotion.get
@@ -56,11 +57,7 @@ defmodule Bookmarksync.Pinboard do
       |> Poison.decode!
 
     else
-      auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
-      query = URI.encode_query( %{
-        "auth_token" => auth,
-        "format" => "json"
-      } )
+      query = URI.encode_query( default_query() )
 
       Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
       |> Bookmarksync.URLBuilder.join_path_with_query( query )
@@ -84,11 +81,7 @@ defmodule Bookmarksync.Pinboard do
   Get all current tags on Pinboard. No cache used since rate limit is low for this endpoint.
   """
   def get_tags do
-    auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
-    query = URI.encode_query( %{
-      "auth_token" => auth,
-      "format" => "json"
-    } )
+    query = URI.encode_query( default_query() )
 
     Bookmarksync.URLBuilder.pinboard_tags_url()
     |> Bookmarksync.URLBuilder.join_path_with_query( query )
@@ -135,12 +128,7 @@ defmodule Bookmarksync.Pinboard do
     |> Enum.each( fn( file ) -> File.rm( "data/pinboard/" <> file ) end )
 
     last = last_update()
-
-    auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
-    query = URI.encode_query( %{
-      "auth_token" => auth,
-      "format" => "json"
-    } )
+    query = URI.encode_query( default_query() )
 
     Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
     |> Bookmarksync.URLBuilder.join_path_with_query( query )
@@ -163,10 +151,10 @@ defmodule Bookmarksync.Pinboard do
   end
 
   def add( bookmark ) do
-    auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
-    query = %{ "auth_token" => auth, "format" => "json" }
-    |> Map.merge( bookmark ) 
-    |> URI.encode_query()
+    query =
+      default_query()
+      |> Map.merge( bookmark )
+      |> URI.encode_query()
 
     Bookmarksync.URLBuilder.pinboard_add_url()
     |> Bookmarksync.URLBuilder.join_path_with_query( query )
