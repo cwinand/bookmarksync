@@ -110,7 +110,9 @@ defmodule Bookmarksync.Pinboard do
   Flushes the cache and adds back a single item with all current bookmarks.
   """
   def reset_cache do
-    File.rm( "data/pinboard/*" )
+    File.ls!( "data/pinboard" )
+    |> Enum.each( fn( file ) -> File.rm( "data/pinboard/" <> file ) end )
+
     last = last_update()
 
     auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
