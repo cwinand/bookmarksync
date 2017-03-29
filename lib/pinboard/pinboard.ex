@@ -59,7 +59,7 @@ defmodule Bookmarksync.Pinboard do
       auth = Bookmarksync.Storage.get( [ "pinboard", "token" ] )
       query = URI.encode_query( %{
         "auth_token" => auth,
-        "format" => "json",
+        "format" => "json"
       } )
 
       Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
