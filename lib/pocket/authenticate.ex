@@ -11,9 +11,10 @@ defmodule Bookmarksync.Pocket.Authenticate do
   a 'request_token'.
   """
   def get_request_token do
+    config = Bookmarksync.Storage.get( :config, [ "pocket" ] )
     post_body = %{
-      "consumer_key" => Bookmarksync.Storage.get( [ "pocket", "consumer_key" ] ),
-      "redirect_uri" => Bookmarksync.Storage.get( [ "pocket", "redirect_uri" ] )
+      "consumer_key" => Map.get( config, "consumer_key" ),
+      "redirect_uri" => Map.get( config, "redirect_uri" ),
     }
 
     Bookmarksync.URLBuilder.pocket_request_token_url()
@@ -26,7 +27,7 @@ defmodule Bookmarksync.Pocket.Authenticate do
   """
   def get_access_token( code ) do
     post_body = %{
-      "consumer_key" => Bookmarksync.Storage.get( [ "pocket", "consumer_key" ] ),
+      "consumer_key" => Bookmarksync.Storage.get( :config, [ "pocket", "consumer_key" ] ),
       "code" => code
     }
 
@@ -46,7 +47,8 @@ defmodule Bookmarksync.Pocket.Authenticate do
   Makes a get request for the authorization URL, which approves the access token.
   """
   def authorize( request_token ) do
-    Bookmarksync.URLBuilder.pocket_user_auth_url( request_token, Bookmarksync.Storage.get( [ "pocket", "redirect_uri" ] ) )
+    request_token
+    |> Bookmarksync.URLBuilder.pocket_user_auth_url( Bookmarksync.Storage.get( :config, [ "pocket", "redirect_uri" ] ) )
     |> HTTPotion.get
   end
 
@@ -72,7 +74,7 @@ defmodule Bookmarksync.Pocket.Authenticate do
   Checks if access token exists in store and then pings Pocket API with that token
   """
   def is_authenticated do
-    case Bookmarksync.Storage.get( [ "pocket", "access_token" ] ) do
+    case Bookmarksync.Storage.get( :config, [ "pocket", "access_token" ] ) do
       nil -> false
       _ -> 
         case Bookmarksync.Pocket.ping() do
@@ -102,7 +104,8 @@ defmodule Bookmarksync.Pocket.Authenticate do
       :request_token -> 
         { :ok, Map.get( response_body, "code" ) }
       :access_token -> 
-        Bookmarksync.Storage.set( [ "pocket", "access_token" ], Map.get( response_body, "access_token" ) )
+        Map.get( response_body, "access_token" )
+        |> Bookmarksync.Storage.set( :config, [ "pocket", "access_token" ] )
         { :ok, response_body }
     end
   end
