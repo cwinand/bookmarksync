@@ -6,7 +6,7 @@ defmodule Bookmarksync.Pocket do
   Stripped down request to Pocket API to check if we are authenticated and the service is available.
   """
   def ping do
-    auth = Bookmarksync.Storage.get( "pocket" )
+    auth = Bookmarksync.Storage.get( :config, [ "pocket" ] )
     post_body = %{
       "consumer_key" => Map.get( auth, "consumer_key" ),
       "access_token" => Map.get( auth, "access_token" ),
@@ -29,7 +29,7 @@ defmodule Bookmarksync.Pocket do
   Defaults to fetching all unread items.
   """
   def get( options \\ %{} ) do
-    auth = Bookmarksync.Storage.get( "pocket" )
+    auth = Bookmarksync.Storage.get( :config, [ "pocket" ] )
     defaults = %{
       "consumer_key" => Map.get( auth, "consumer_key" ),
       "access_token" => Map.get( auth, "access_token" ),
