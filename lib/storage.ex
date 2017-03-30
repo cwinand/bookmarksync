@@ -3,43 +3,64 @@ defmodule Bookmarksync.Storage do
   Simple JSON storage layer for keys, access tokens, etc.
   """
 
-  @store "data/data.json"
-  @store_test "data/data_test.json"
+  @config "data/config.json"
 
-  def open do
-    case Mix.env() do
-      :dev -> File.read!( @store ) |> Poison.decode!
-      :test -> File.read!( @store_test ) |> Poison.decode!
-    end
+  def open( file ) do
+    file
+    |> File.read!
+    |> Poison.decode!
   end
 
-  def save( data ) do
+  def save( data, file ) do
     encoded = Poison.encode!( data )
-    case Mix.env() do
-      :dev -> File.write!( @store, encoded )
-      :test -> File.write!( @store_test, encoded )
+    File.write!( file, encoded )
+  end
+
+  def get( type, identifiers ) do
+    case type do
+      :config ->
+        get_config( identifiers )
+      :cache ->
+        name = List.first( identifiers )
+        timestamp =
+          List.last( identifiers )
+          |> Integer.to_string
+
+        get_cache( name, timestamp )
     end
   end
 
-  def get( keys ) when is_list keys do
-    open()
+  def get_config( keys ) do
+    open( @config )
     |> get_in( keys )
   end
 
-  def get( key ) do
-    open()
-    |> Map.get( key )
+  def get_cache( name, timestamp ) do
+    open "data/#{ name }/#{ timestamp }.json"
   end
 
-  def set( keys, value ) when is_list keys do
-    open()
+  def set( data, type, identifiers ) do
+    case type do
+      :config ->
+        set_config( data, identifiers )
+      :cache ->
+        name = List.first( identifiers )
+        timestamp =
+          List.last( identifiers )
+          |> Integer.to_string
+
+        set_cache( data, name, timestamp )
+    end
+  end
+
+  def set_config( value, keys ) do
+    open( @config )
     |> put_in( keys, value )
-    |> save()
+    |> save( @config )
   end
 
-  def set( key, value ) do
-    open()
-    |> Map.update( key, value, fn _ -> value end )
-    |> save()
+  def set_cache( data, name, timestamp ) do
+    file = "data/#{ name }/#{ timestamp }.json"
+    save( data, file )
   end
 end
