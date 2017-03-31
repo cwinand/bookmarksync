@@ -87,7 +87,11 @@ defmodule Bookmarksync.Storage do
   end
 
   def flush_cache( name ) do
-    File.rm_rf( "data/#{ name }" )
-    File.mkdir( "data/#{ name }" )
+    cache = "data/#{ name }"
+
+    if File.dir?( cache ) do
+      File.rm_rf( cache )
+      File.mkdir( cache )
+    end
   end
 end
