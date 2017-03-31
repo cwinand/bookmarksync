@@ -51,20 +51,17 @@ defmodule Bookmarksync.Pinboard do
   """
   def get_all do
     last = last_update()
-    last_cache = "data/pinboard/#{ last }.json"
-    if File.exists?( last_cache ) do
-      File.read!( last_cache )
-      |> Poison.decode!
 
-    else
+    if ( Bookmarksync.Storage.stale_cache?( "pinboard", last ) )
       query = URI.encode_query( default_query() )
 
       Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
       |> Bookmarksync.URLBuilder.join_path_with_query( query )
       |> HTTPotion.get
       |> Map.get( :body )
-      |> update_cache( last )
-      |> Poison.decode!
+      |> Bookmarksync.Storage.set( :cache, [ "pinboard", last ] )
+    else
+      Bookmarksync.Storage.get( :cache, [ "pinboard" ] )
     end
   end
 
@@ -91,51 +88,11 @@ defmodule Bookmarksync.Pinboard do
   end
 
   @doc """
-  Simple check to see if the current cache is out of date.
-  """
-  def stale_cache? do
-    last = last_update()
-    cache = get_latest_cache() 
-            |> String.split( "." )
-            |> List.first
-            |> String.to_integer
-
-    last > cache
-  end
-
-  @doc """
-  Gets the filename of the most recent cached JSON.
-  """
-  def get_latest_cache do
-    File.ls!( "data/pinboard" )
-    |> Enum.sort
-    |> List.last
-  end
-
-  @doc """
-  Writes a new JSON blob of bookmarks to a file named by the last_update timestamp.
-  """
-  def update_cache( data, timestamp ) do
-    File.write( "data/pinboard/#{ timestamp }.json", data )
-    data
-  end
-
-  @doc """
   Flushes the cache and adds back a single item with all current bookmarks.
   """
   def reset_cache do
-    File.ls!( "data/pinboard" )
-    |> Enum.each( fn( file ) -> File.rm( "data/pinboard/" <> file ) end )
-
-    last = last_update()
-    query = URI.encode_query( default_query() )
-
-    Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
-    |> Bookmarksync.URLBuilder.join_path_with_query( query )
-    |> HTTPotion.get
-    |> Map.get( :body )
-    |> update_cache( last )
-    |> Poison.decode!
+    Bookmarksync.Storage.flush_cache( "pinboard" )
+    get_all()
   end
 
   @doc """
