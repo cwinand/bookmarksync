@@ -14,7 +14,6 @@ defmodule Bookmarksync.Storage do
   def save( data, file ) do
     encoded = Poison.encode!( data )
     File.write!( file, encoded )
-    data
   end
 
   def get( type, identifiers ) do
@@ -68,22 +67,27 @@ defmodule Bookmarksync.Storage do
   @doc """
   Gets the filename of the most recent cached JSON.
   """
-  def get_latest_cache( name ) do
-    File.ls!( "data/#{ name }" )
-    |> Enum.sort
-    |> List.last
+  def latest_cache( name ) do
+    files = File.ls!( "data/#{ name }" )
+    unless Enum.empty?( files ) do
+      Enum.sort( files )
+      |> List.last
+      |> String.split( "." )
+      |> List.first
+      |> String.to_integer
+    end
   end
 
   @doc """
   Simple check to see if the current cache is out of date.
   """
   def stale_cache?( name, latest ) do
-    cache = get_latest_cache( name ) 
-            |> String.split( "." )
-            |> List.first
-            |> String.to_integer
-
-    latest > cache
+    cache = latest_cache( name ) 
+    if cache == nil do
+      true
+    else
+      latest > cache
+    end
   end
 
   def flush_cache( name ) do
