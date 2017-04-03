@@ -52,7 +52,7 @@ defmodule Bookmarksync.Pinboard do
   def get_all do
     last = last_update()
 
-    if ( Bookmarksync.Storage.stale_cache?( "pinboard", last ) )
+    if ( Bookmarksync.Storage.stale_cache?( "pinboard", last ) ) do
       query = URI.encode_query( default_query() )
 
       Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
