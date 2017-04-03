@@ -59,6 +59,7 @@ defmodule Bookmarksync.Pinboard do
       |> Bookmarksync.URLBuilder.join_path_with_query( query )
       |> HTTPotion.get
       |> Map.get( :body )
+      |> Poison.decode!
       |> Bookmarksync.Storage.set( :cache, [ "pinboard", last ] )
     else
       latest = Bookmarksync.Storage.latest_cache( "pinboard" )
