@@ -61,7 +61,8 @@ defmodule Bookmarksync.Pinboard do
       |> Map.get( :body )
       |> Bookmarksync.Storage.set( :cache, [ "pinboard", last ] )
     else
-      Bookmarksync.Storage.get( :cache, [ "pinboard" ] )
+      latest = Bookmarksync.Storage.latest_cache( "pinboard" )
+      Bookmarksync.Storage.get( :cache, [ "pinboard", latest ] )
     end
   end
 
