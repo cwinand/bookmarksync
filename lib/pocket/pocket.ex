@@ -93,12 +93,12 @@ defmodule Bookmarksync.Pocket do
       end ) == nil end )
   end
 
-  def process_all( data ) do
+  def process_all( data, existing_bookmarks ) do
     data
     |> process_api_response()
     |> flatten_tags()
     |> format_bookmarks()
-    |> remove_duplicate_bookmarks( Bookmarksync.Pinboard.get_all_links )
+    |> remove_duplicate_bookmarks( existing_bookmarks )
   end
 end
 
