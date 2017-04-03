@@ -61,7 +61,9 @@ defmodule Bookmarksync.Storage do
 
   def set_cache( data, name, timestamp ) do
     file = "data/#{ name }/#{ timestamp }.json"
-    save( data, file )
+    case save( data, file ) do
+      :ok -> data
+    end
   end
 
   @doc """
