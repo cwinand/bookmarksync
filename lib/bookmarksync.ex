@@ -6,7 +6,7 @@ defmodule Bookmarksync do
   alias Bookmarksync.Pocket
   alias Bookmarksync.Pinboard
 
-  def start_sync( get_from_pocket \\ %{ "favorites" => 1 } ) do
+  def start_sync( get_from_pocket \\ %{ "favorite" => 1, "state" => "all" } ) do
     existing_bookmarks = Pinboard.get_all_links()
 
     Pocket.get( get_from_pocket )
