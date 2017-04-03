@@ -23,6 +23,7 @@ defmodule Bookmarksync.Pinboard do
 
     case status do
       200 -> :ok
+      429 -> :rate_limit
       _   -> :error
     end
   end
@@ -55,12 +56,18 @@ defmodule Bookmarksync.Pinboard do
     if ( Bookmarksync.Storage.stale_cache?( "pinboard", last ) ) do
       query = URI.encode_query( default_query() )
 
-      Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
-      |> Bookmarksync.URLBuilder.join_path_with_query( query )
-      |> HTTPotion.get
-      |> Map.get( :body )
-      |> Poison.decode!
-      |> Bookmarksync.Storage.set( :cache, [ "pinboard", last ] )
+      response = 
+        Bookmarksync.URLBuilder.pinboard_retrieve_all_url()
+        |> Bookmarksync.URLBuilder.join_path_with_query( query )
+        |> HTTPotion.get
+
+      case Map.get( response, :status_code ) do
+        429 -> raise "Reached Pinboard API rate limit. Try again in a few minutes."
+        200 ->
+          Map.get( response, :body )
+          |> Poison.decode!
+          |> Bookmarksync.Storage.set( :cache, [ "pinboard", last ] )
+      end
     else
       latest = Bookmarksync.Storage.latest_cache( "pinboard" )
       Bookmarksync.Storage.get( :cache, [ "pinboard", latest ] )
