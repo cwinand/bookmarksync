@@ -1,5 +1,5 @@
 defmodule Bookmarksync.StorageTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import Bookmarksync.Storage
 
