@@ -7,7 +7,7 @@ You must have a developer token on Pocket to authenticate, which can be made at 
 ## Installation
 
 Clone the repo, then install the dependencies:
-```elixir
+```shell
 $ mix deps.get
 ```
 
@@ -15,17 +15,17 @@ $ mix deps.get
 
 ### Setup
 
-Create a new directory `data`, and create two more directories there called `pinboard` and `pocket`.
+Create a new directory `data`, and create two more directories there called `pinboard` and `pocket`. These are used to cache data to avoid unnecessary HTTP requests.
 
 Create a `config.json` within data, with the following structure:
 ```json
 {
   "pinboard": {
-    "token": YOUR_PINBOARD_API_TOKEN
+    "token": "YOUR_PINBOARD_API_TOKEN"
   },
   "pocket": {
-    "consumer_key": YOUR_POCKET_CONSUMER_KEY,
-    "redirect_uri": YOUR_POCKET_APP_REDIRECT
+    "consumer_key": "YOUR_POCKET_CONSUMER_KEY",
+    "redirect_uri": "YOUR_POCKET_APP_REDIRECT"
   }
 }
 ```
