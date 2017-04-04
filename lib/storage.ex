@@ -3,8 +3,6 @@ defmodule Bookmarksync.Storage do
   Simple JSON storage layer for keys, access tokens, etc.
   """
 
-  @config "data/config.json"
-
   def open( file ) do
     file
     |> File.read!
@@ -31,7 +29,8 @@ defmodule Bookmarksync.Storage do
   end
 
   def get_config( keys ) do
-    open( @config )
+    Application.get_env( :bookmarksync, :key_file )
+    |> open()
     |> get_in( keys )
   end
 
@@ -54,9 +53,12 @@ defmodule Bookmarksync.Storage do
   end
 
   def set_config( value, keys ) do
-    open( @config )
+    config = Application.get_env( :bookmarksync, :key_file )
+
+    config
+    |> open()
     |> put_in( keys, value )
-    |> save( @config )
+    |> save( config )
   end
 
   def set_cache( data, name, timestamp ) do
